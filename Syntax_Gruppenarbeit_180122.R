@@ -1,2 +1,3 @@
 # ok lets go 
-x <- c(1,2,3)
+x <- c("1","2","3")
+# Test test
