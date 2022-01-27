@@ -26,15 +26,15 @@ Mikrozensus <- read_dta('mz2010_cf.dta')
 
 #Subdatensatz mit (eventuell) relevanten Variablen ### Eventuell nochmal anpassen an tatsächlich verwendete Variablen
 
-MZsubCA <-Mikrozensus[,c("ef1", "ef136", "ef137", "ef830", "ef739", "ef737", "ef742", "ef707", "ef217", "ef492",
-                          "ef638", "ef663", "ef669", "ef770", "ef667", "ef310", "ef312", "ef44", "ef46", "ef763")]
+MZsubCA <-Mikrozensus[,c("ef1", "ef136", "ef137", "ef830", "ef310", "ef312", "ef44", "ef46", "ef131", "ef739",
+                          "ef737", "ef742", "ef743", "ef745", "ef707", "ef492", "ef638", "ef663", "ef669", "ef770", "ef667", "ef736")]
 
 # einzelne Variablen betrachten
 install.packages('summarytools')
 library(summarytools)
 
 freq(MZsubCA$ef136) 
-freq(MZsubCA$ef739) # Clusteranalyse lieber auf Haupteinkommensbezieher beziehen? Eigentlich sinnvoller, oder?
+freq(MZsubCA$ef739) # Clusteranalyse lieber auf Haupteinkommensbezieher beziehen? Eigentlich fast sinnvoller, oder?
 
 ###### VARIABLEN #########################################
 #LandD <- Mikrozensus$ef1
@@ -49,7 +49,7 @@ freq(MZsubCA$ef739) # Clusteranalyse lieber auf Haupteinkommensbezieher beziehen
 #Geschlecht <- Mikrozensus$ef44
 
 #Alter <- Mikrozensus$ef46
-#Arbeitszeit <- Mikrozensus$ef217          #sehr sehr viel NA (98%), würde ich rausnehmen
+#Arbeitszeit <- Mikrozensus$ef131    # viel NA (52%) - trotzdem reinnehmen?
 
 #### HAUPTEINKOMMENSBEZIEHER
 #BerufHEB <- Mikrozensus$ef739
@@ -60,17 +60,19 @@ freq(MZsubCA$ef739) # Clusteranalyse lieber auf Haupteinkommensbezieher beziehen
 #hAbschlussHEB <- Mikrozensus$ef745
 #GeschlechtHEB <- Mikrozensus$ef731
 
-#AlterHEB <- Mikrozensus$????. ###??? # find ich nix zu - brauchen wir das?
+#AlterHEB <- Mikrozensus$ef         # Gibts nicht?
+#GeschlechtHEB <- Mikrozensus$ef    # Gibts nicht?
+#ArbeitszeitHEB <- Mikrozensus$ef   # Gibts nicht?
 
 #### HAUSHALT
 #Haushaltseinkommen <- Mikrozensus$ef707
 #Wohnraumgröße <- Mikrozensus$ef492
-#QuadratmeterMiete <- Mikrozensus$ef638.   # 57% NA - trotzdem interessant?
+#QuadratmeterMiete <- Mikrozensus$ef638   # 57% NA - trotzdem interessant?
 #Haushaltsgröße <- Mikrozensus$ef663
 #AnzahlKinderHH <- Mikrozensus$ef669
 #AnzahlKinderInsges <- Mikrozensus$ef770
 #AnzahlEinkommensbezieher <- Mikrozensus$ef667
-#Lebensformenkonzept <- Mikrozensus$ef736
+#Lebensformenkonzept <- Mikrozensus$ef736   # 4 Lebensformkonzepte, vielleicht auch interessant für eine Untersuchung?
 
 
 
