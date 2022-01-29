@@ -67,7 +67,7 @@ install.packages('summarytools')
 library(summarytools)
 library(car)             # umcodieren von Variablen
 
-MZsubCA$Land <- recode(MZsubCA$Land, "11=2")  #West = 1, Ost = 0
+MZsubCA$Land <- recode(MZsubCA$Land, "11=2")  #West = 1, Ost = 2
 freq(MZsubCA$Land)
 
 freq(MZsubCA$BerufHEB)
