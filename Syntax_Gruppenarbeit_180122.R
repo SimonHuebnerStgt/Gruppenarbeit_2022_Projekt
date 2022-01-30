@@ -151,6 +151,16 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
 CAmeans$BerufHEB
 freq(CAmeans$BerufHEB)
 
+###nicht die schnellste und sauberste Variante, braucht eventuell einen Gegencheck :)
+rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
+                        "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
+                        "341","342","343","344","345","346","347","348",
+                        "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
+                        "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
+                        "831","832","833","834","911","913","914","915","921","931","932","933")
+                  
+rownames(CAmeans)
+
 
 #CAmeans$BerufHEB <- as.character(CAmeans$BerufHEB)  #hmmm, kann man die Zeilen irgendwie benennen? Wäre cool für die Übersicht/Grafiken
 
@@ -389,5 +399,5 @@ hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
 
 
-
+### ab hier eigentlich ähnlich wie im Sktipt vorgehen, und ne hübsche Grafik machen, oder?
 
