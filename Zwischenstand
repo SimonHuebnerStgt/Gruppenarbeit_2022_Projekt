@@ -1,0 +1,39 @@
+>fviz_nbclust(CA1, hcut, method = "wss") +
+geom_vline(xintercept = 3, linetype = 2)+
+labs(subtitle = "Elbow method")
+
+#drei cluster?
+> options(stringsAsFactors = FALSE)
+
+> fviz_nbclust(CA1, hcut, method = "silhouette")+
+labs(subtitle = "Silhouette method")
+#zwei Cluster?
+
+> d1 <- dist(CA1, method = 'euclidean')
+> head(as.matrix(d1))
+
+#Cluster Dendogramm
+
+> hc.compl <- hclust(d1, method="complete")
+> fviz_dend(hc.compl)
+
+# Versuch mit PCA -> geht nicht weil BerufHEB nicht quantitativ ist
+CA_means.pca <- PCA(CAmeans,
+scale.unit = F,
+ncp = 5,
+graph = F)
+
+> corrplot(CA1, is.corr=FALSE) # unübersichtlich
+
+# Gap statistic (maximum)
+fviz_nbclust(CA1, kmeans, nstart = 4,  method = "gap_stat", nboot = 500)
+
+#
+> fviz_dend(hc.compl,4)
+> d1.k <- kmeans(d1, 
++ 4, 
++ iter.max = 10, 
++ nstart = 2)
+cluster <- cutree(hc.compl, k = 4)
+head(cluster)
+print(d1.k)
