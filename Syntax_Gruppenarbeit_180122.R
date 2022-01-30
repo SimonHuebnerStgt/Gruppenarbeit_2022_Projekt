@@ -1,4 +1,4 @@
-#Alisa Aktuell: 
+##Alisa Aktuell: 
 
 ##############################################
 # Gruppenarbeit CSS, USL Gruppe 6
@@ -140,7 +140,8 @@ freq(CA$BerufHEB)
 freq(CAnoNA$BerufHEB)
 CAnoNA$BerufHEB          #811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen) - unter 5
                          #111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe) - unter 10
-                         #ansonsten alle Berufe vertreten, oder?
+                         #223 nicht vorhanden: (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
+                         #613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
 
 
 #### Tabelle mit Means der Berufsgruppen je Variable
@@ -151,30 +152,121 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
 CAmeans$BerufHEB
 freq(CAmeans$BerufHEB)
 
-#CAmeans$BerufHEB <- as.character(CAmeans$BerufHEB)  #hmmm, kann man die Zeilen irgendwie benennen? Wäre cool für die Übersicht/Grafiken
+#rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
+ #                       "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
+ #                       "341","342","343","344","345","346","347","348",
+ #                       "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
+ #                       "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
+ #                       "831","832","833","834","911","913","914","915","921","931","932","933")
 
-###nicht die schnellste und sauberste Variante, braucht eventuell einen Gegencheck :)
-rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
-                        "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
-                        "341","342","343","344","345","346","347","348",
-                        "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
-                        "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
-                        "831","832","833","834","911","913","914","915","921","931","932","933")
+
+#### Hoffe das ist nicht zu übertrieben :D musste die Bezeichnungen eh abkürzen - hilft fürs Diagramm
+rownames(CAmeans) <- c( "Soldaten",                                        #11
+                        "Politiker/leitende Verwaltungsbedienstete",       #111
+                        "leitende Bedienstete Interessenorg.",             #114
+                        "Geschäftsleiter/Bereichsleiter große Org.",       #120
+                        "Direktoren/Hauptgeschäftsführer",                 #121
+                        "Produktions-/Operationsleiter",                   #122
+                        "sonstige Fachbereichsleiter",                     #123
+                        "Leiter kleiner Unternehmen o.n.A.",               #130
+                        "Leiter kleiner Unternehmen",                      #131
+                        "Physiker/Chemiker etc.",                          #211
+                        "Mathematiker/Statistiker/etc.",                   #212
+                        "Informatiker",                                    #213
+                        "Architekten/Ingenieure etc.",                     #214
+                        "Biowissenschaftler",                              #221
+                        "Mediziner",                                       #222
+                        "Uni-/Hochschullehrer",                            #231
+                        "Lehrer Sekundarbereich",                          #232
+                        "wiss. Lehrer Primär-/Vorschulbereich",            #233
+                        "wiss. Sonderschullehrer",                         #234
+                        "sonst. wiss. Lehrkräfte",                         #235
+                        "Unternehmensberatungs-/Organisationsfachkr.",     #241
+                        "Juristen",                                        #242
+                        "Archiv-/Bibliotheks-/Informationswiss.",          #243
+                        "Sozialwissenschaftler etc.",                      #244
+                        "Schriftsteller, bildende/darst. Künstler",        #245
+                        "Geistliche/Seelsorger",                           #246
+                        "wiss. Verwaltungsfachkr. öffentl. Dienst",        #247
+                        "material-/ingenieurtechnische Fachkr",            #311
+                        "Datenverarbeitungsfachkräfte",                    #312
+                        "Bediener optischer/elektronischer Anlagen",       #313
+                        "Schiffs-/Flugzeugführer etc.",                    #314
+                        "Sicherheits-/Qualitätskontrolleure",              #315
+                        "Biotechniker etc.",                               #321
+                        "med. Fachberufe (ohne Krankenpflege)",            #322
+                        "Krankenpflege/Geburtshilfefachkr. n.wiss.",       #323
+                        "Lehrkräfte Vorschule n.wiss",                     #332
+                        "Sonderschullehrkräfte n.wiss.",                   #333
+                        "Sonstige Lehrkräfte n.wiss.",                     #334
+                        "Finanz-/Verkaufsfachkräfte",                      #341
+                        "Vermittler gew. Dienstleist./Handelsmakler",      #342
+                        "Verwaltungsfachkräfte",                           #343
+                        "Zoll-/Steuer-Fachkräfte etc.",                    #344
+                        "Polizeikommissare/Detektive",                     #345
+                        "Sozialpflegerische Berufe",                       #346
+                        "Künstler-/unterhaltungs-/Sportberufe",            #347
+                        "Ordensbrüder/-Schwestern/Seelsorgehelfer",        #348
+                        "Sekretärinnen/Machienenschreibkr. etc.",          #411
+                        "Rechnungs-/Statistik-/Finanzwesensangest.",       #412
+                        "Materialverwaltungs-/Tansportangestellte",        #413
+                        "Bibliotheks-/Postangestellte etc.",               #414
+                        "sonstige Büroangestellte",                        #419
+                        "Kassierer-/Schalterangestellte etc.",             #421
+                        "Kundeninformationsangestellte",                   #422
+                        "Reisebegleiter etc.",                             #511
+                        "Dienstleistungsberuf Hauswirtschaft/Gastro",      #512
+                        "Pflegeberufe etc.",                               #513
+                        "sonst. personenbez. Dienstleistungsberufe",       #514
+                        "Sicherheitsbedienstete",                          #516
+                        "Mannequins/Dressmen/Marktverkäufer etc.",         #521
+                        "Fachkr. Landwirtschaft/Fischerei",                #610
+                        "Gärtner/Ackerbauern",                             #611
+                        "Tierwirtschaftliche Berufe etc.",                 #612
+                        "Forstarbeitskräfte/Fischer/Jäger etc.",           #614
+                        "Bergleute/Sprengmeister/Steinbearbeiter etc.",    #711
+                        "Baukonstruktionsberufe etc.",                     #712
+                        "Ausbauberufe etc.",                               #713
+                        "Maler/Gebäudereiniger etc.",                      #714
+                        "Former/Baumetallverformer/Schweißer etc.",        #721       
+                        "Grobschmiede/Werkzeugmacher etc.",                #722
+                        "Maschinenmechaniker/-schlosser",                  #723
+                        "Elektro-/Elektronikmechaniker/-monteure",         #724
+                        "Präzisionsarbeiter Metall verw. Werkstoffe",      #731
+                        "Töpfer/Glasmacher/Kunsthandwerker etc.",          #732
+                        "Druckhandwerker etc.",                            #734
+                        "Nahrungsmittelverarbeitungsberufe etc.",          #741
+                        "Holzbearbeiter/Möbeltischler etc.",               #742
+                        "Textil-/Bekleidungsberufe etc.",                  #743
+                        "Fell-/Lederverarbeiter/Schuhmacher",              #744
+                        "Anlagenbed. Mineralaufber./Keramik/Glas etc.",    #811
+                        "Verfahrensanlagebed. Metallerzeugung/-formung",   #812
+                        "Anlagenbed. Holzaufbereitung/Papierherst.",       #814
+                        "Bediener chemischer Verfahrensanlagen",           #815
+                        "Bediener Energieerzeugungsanlagen etc.",          #816
+                        "Maschinenbed. Metall/Mineralerz.",                #821
+                        "Maschinenbed. chemische Erzeugnisse",             #822
+                        "Maschinenbed. Gummi/Kunststofferzeugn./Holz",     #823
+                        "Maschinenbed. Druck-/Buchbinde-/Papiererz.",      #825
+                        "Maschinenbed. Textil-/Pelz-/Ledererz.",           #826
+                        "Maschinenbed. Nahrungs-/Genussmittelherst.",      #827
+                        "Montierer",                                       #828
+                        "sonstige Maschinenbediener",                      #829
+                        "Lokomotivführer etc.",                            #831
+                        "Kraftfahrzeugführer",                             #832
+                        "Landmaschinenführer etc.",                        #833
+                        "Deckspersonal Schiffe etc.",                      #834
+                        "Straßenhändler etc./Müllsammler",                 #911
+                        "Haushaltshilfen/Reinigungspersonal etc.",         #913
+                        "Hausmeister/Fensterputzer etc.",                  #914
+                        "Boten/Träger/Pförtner etc.",                      #915
+                        "Hilfsarbeiter Landwirtsch./Fischerei",            #921
+                        "Hilfsarbeiter Bergbau/Baugewerbe",                #931
+                        "Hilfsarbeiter Fertigung",                         #932
+                        "Transport-/Frachtarbeiter")                       #933
                   
 rownames(CAmeans)
 
-
-
-
-######### Testdatensätze von Simon
-#[Test Vergleich weniger Variablen]
-#Test1 <-MZsubCA[,c("BerufHEB", "Haushaltseinkommen", "Wohnraumgroeße", "Haushaltsgroeße",
-#                "AnzahlKinderHH",  "Wohneigentum")]
-#Test2 <-MZsubCA[,c("Haushaltseinkommen", "Wohnraumgroeße", "Haushaltsgroeße",
-#                                 "AnzahlKinderHH",  "Wohneigentum")]
-#
-# [Die letzte Überlegung für mich heute war: Wenn wir analog zu diesem Swiss Datensatz arbeiten wollen,
-# müssen wir dann nicht den ganzen Datensatz nach den BerufHEB "gruppieren"? (sind etwas über 100)]
 
 
 #### Clusteranalyse
@@ -210,12 +302,7 @@ hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
 
 
-
-### ab hier eigentlich ähnlich wie im Sktipt vorgehen, und ne hübsche Grafik machen, oder?
-
-
-
-
+### ab hier eigentlich ähnlich wie im Sktipt vorgehen
 
 
 
