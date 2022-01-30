@@ -133,9 +133,14 @@ CA <-MZsubCA[,c("Land", "BerufHEB", "EinkommenHEB", "AbschlussHEB", "GeschlechtH
                 "Haushaltseinkommen", "Wohnraumgroesse", "Haushaltsgroesse",
                 "AnzahlKinderHH", "AnzahlKinderInsges", "AnzahlEinkommensbezieher", "WohneigentumJaNein")]
 
-#CA <- na.omit(CA)
+CAnoNA <- na.omit(CA)
 
-summary(CA)
+#Betrachten der Variable Berufe - Häufigkeiten, ggf. Berufsgruppen entfernen?
+freq(CA$BerufHEB)
+freq(CAnoNA$BerufHEB)
+CAnoNA$BerufHEB          #811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen) - unter 5
+                         #111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe) - unter 10
+                         #ansonsten alle Berufe vertreten, oder?
 
 
 #### Tabelle mit Means der Berufsgruppen je Variable
@@ -143,6 +148,11 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
                            Haushaltseinkommen, Wohnraumgroesse, Haushaltsgroesse,
                            AnzahlKinderHH, AnzahlKinderInsges, AnzahlEinkommensbezieher, WohneigentumJaNein) ~ BerufHEB, CA, mean)
 
+CAmeans$BerufHEB
+freq(CAmeans$BerufHEB)
+
+
+#CAmeans$BerufHEB <- as.character(CAmeans$BerufHEB)  #hmmm, kann man die Zeilen irgendwie benennen? Wäre cool für die Übersicht/Grafiken
 
 
 ######### Testdatensätze von Simon
@@ -156,12 +166,15 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
 # müssen wir dann nicht den ganzen Datensatz nach den BerufHEB "gruppieren"? (sind etwas über 100)]
 
 
+#### Clusteranalyse
 
-
+library(factoextra)
+library(FactoMineR)
+library(ggplot2)
 
 # Skalieren
 
-CA1 <- scale(CAmeans)
+CA1 <- scale(CAmeans[,2:13])
 
 
 # Ellbogenkriterium / Silhouette
@@ -184,6 +197,10 @@ head(as.matrix(d1))
 
 hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
+
+
+
+
 
 
 
