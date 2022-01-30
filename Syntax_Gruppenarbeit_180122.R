@@ -151,6 +151,8 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
 CAmeans$BerufHEB
 freq(CAmeans$BerufHEB)
 
+#CAmeans$BerufHEB <- as.character(CAmeans$BerufHEB)  #hmmm, kann man die Zeilen irgendwie benennen? Wäre cool für die Übersicht/Grafiken
+
 ###nicht die schnellste und sauberste Variante, braucht eventuell einen Gegencheck :)
 rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
                         "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
@@ -162,7 +164,6 @@ rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","
 rownames(CAmeans)
 
 
-#CAmeans$BerufHEB <- as.character(CAmeans$BerufHEB)  #hmmm, kann man die Zeilen irgendwie benennen? Wäre cool für die Übersicht/Grafiken
 
 
 ######### Testdatensätze von Simon
@@ -210,6 +211,7 @@ fviz_dend(hc.compl)
 
 
 
+### ab hier eigentlich ähnlich wie im Sktipt vorgehen, und ne hübsche Grafik machen, oder?
 
 
 
@@ -399,5 +401,4 @@ hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
 
 
-### ab hier eigentlich ähnlich wie im Sktipt vorgehen, und ne hübsche Grafik machen, oder?
 
