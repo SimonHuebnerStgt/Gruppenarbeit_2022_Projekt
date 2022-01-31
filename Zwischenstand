@@ -73,7 +73,21 @@ fviz_cluster(data = d1,
 + d1.k)
 #viel besser!
 
+#aggregate
 aggregate(d1, by=list(cluster=d1$cluster), mean)
 # Fehlermeldung: Error in as.data.frame.default(x) : 
   cannot coerce class ‘"dist"’ to a data.frame
-  Ich glaube wir müssen d1 in ein data-frame umwandeln. Mir bisher leider nicht gelungen
+  Ich glaube wir müssen d1 in ein data-frame umwandeln. 
+  
+ > install.packages("spaa")
+ > library("spaa")
+ > head(dist2list(d1))
+ > d1 <-dist2list(d1)
+ > class(d1)
+ #d1 ist jetzt ein dataframe
+ > aggregate(d1, by=list(cluster=d1$cluster), mean)
+ #Fehlermeldung: Error in aggregate.data.frame(d1, by = list(cluster = d1$cluster), mean) : 
+  arguments must have same length
+  
+ 
+ 
