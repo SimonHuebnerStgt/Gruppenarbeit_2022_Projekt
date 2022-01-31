@@ -7,12 +7,13 @@
 
 # Datensatz: Mikrozensus 2010
 # Explorative Untersuchung Berufsgruppen und Lebensumstände // hierarchische Clusteranalyse (+Hauptkomponentenanalye/PCA?)
-# Es geht um die Berufe der Haupteinkommensbezieher eines Haushalts und deren Wohn- und Lebenssituation
+# Thema: Die Berufe der Haupteinkommensbezieher eines Haushalts und deren Wohn- und Lebenssituation
 
 # Vorüberlegungen und Methodik: 
-# Mikrozensus erfasst die beruflichen und privaten Lebensumstände der deutschen Bevölkerung
-# Der Datensatz beinhaltet 23374 Fälle und schlüsselt verschiedene Lebensbereiche der Befragten detailliert auf
-# Auffallend ist die Erfassung von über 100 verschiedenen Berufen bzw. Berufsgruppen (113?)
+# Mikrozensus erfasst die beruflichen und privaten Lebensumstände der deutschen Bevölkerung.
+# Der Datensatz beinhaltet 23374 Fälle und schlüsselt verschiedene Lebensbereiche der Befragten detailliert auf.
+# Abgefragt werden unter anderem mehr als 100 verschiedenen Berufe in 10 verschiedenen Berufsgruppen
+# nach der Internationalen Standardklassifikation der Berufe (ISCO-88 COM).
 
 # Als Forschungskontext der Untersuchung interessierte uns daher folgendes:
 # Welche Jobs bzw. Branchen ähneln sich in der Lebensführung /-umstände der Beschäftigten? 
@@ -29,7 +30,7 @@ library('datasets')
 library ('dotwhisker')
 library('summarytools')
 
-
+# Working Directory setzen
 setwd("E:/Gruppenarbeit Dateien/Gruppenarbeit_2022_Projekt/Data")
 getwd()
 
@@ -38,15 +39,15 @@ library(haven)
 Mikrozensus <- read_dta('mz2010_cf.dta')
 
 
-#Subdatensatz mit relevanten Variablen [ist hier nur zur Übersicht drin oder?]
-
+#Subdatensatz mit relevanten Variablen für bessere Übersichtlichkeit
+                                                                                                       #Angaben des Befragten - aktuell rauslassen
 MZsubCA <-Mikrozensus[,c( "ef1",                                                                       #"ef136", "ef310", "ef312", "ef44", "ef46", "ef131",
                           "ef739", "ef742", "ef745", "ef731", "ef734",
                           "ef707", "ef492", "ef638", "ef663", "ef669", "ef770", "ef667", "ef491")]
 variable.names(MZsubCA)
 str(MZsubCA)
 
-#### Befragter - aktuell rauslassen, wird aber ggf. nochmal relevant 
+#### Angaben des Befragten - aktuell rauslassen, wird aber ggf. nochmal relevant 
 #MZsubCA$Beruf                     <- MZsubCA$ef136
 #MZsubCA$Einkommen                 <- MZsubCA$ef830 
 #MZsubCA$Schulabschluss            <- MZsubCA$ef310
@@ -138,10 +139,10 @@ CAnoNA <- na.omit(CA)
 #Betrachten der Variable Berufe - Häufigkeiten, ggf. Berufsgruppen entfernen?
 freq(CA$BerufHEB)
 freq(CAnoNA$BerufHEB)
-CAnoNA$BerufHEB          #811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen) - unter 5
-                         #111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe) - unter 10
-                         #223 nicht vorhanden: (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
-                         #613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
+CAnoNA$BerufHEB          #unter 5: 811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen)
+                         #unter 10: 111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe)
+                         #nicht vorhanden: 223 (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
+                         #nicht vorhanden: 613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
 
 
 #### Tabelle mit Means der Berufsgruppen je Variable
@@ -152,6 +153,7 @@ CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, Staa
 CAmeans$BerufHEB
 freq(CAmeans$BerufHEB)
 
+
 #rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
  #                       "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
  #                       "341","342","343","344","345","346","347","348",
@@ -159,8 +161,7 @@ freq(CAmeans$BerufHEB)
  #                       "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
  #                       "831","832","833","834","911","913","914","915","921","931","932","933")
 
-
-#### Hoffe das ist nicht zu übertrieben :D musste die Bezeichnungen eh abkürzen - hilft fürs Diagramm
+#### Benennung der Berufsgruppen für bessere Übersichtlichkeit/Interpretierbarkeit
 rownames(CAmeans) <- c( "Soldaten",                                        #11
                         "Politiker/leitende Verwaltungsbedienstete",       #111
                         "leitende Bedienstete Interessenorg.",             #114
@@ -268,8 +269,7 @@ rownames(CAmeans) <- c( "Soldaten",                                        #11
 rownames(CAmeans)
 
 
-
-#### Clusteranalyse
+#### Durchführung der Clusteranalyse
 
 library(factoextra)
 library(FactoMineR)
@@ -283,26 +283,24 @@ CA1 <- scale(CAmeans[,2:13])
 # Ellbogenkriterium / Silhouette
 
 fviz_nbclust(CA1, hcut, method = "wss") +
-  geom_vline(xintercept = 3, linetype = 2)+
+  geom_vline(xintercept = 5, linetype = 2)+
   labs(subtitle = "Elbow method")
+                                    # Kein eindeutiger "Knick" erkennbar - am ehesten noch bei 5 Clustern?
 
 fviz_nbclust(CA1, hcut, method = "silhouette")+
   labs(subtitle = "Silhouette method")
+                                    # Maximum eindeutig bei 2 Clustern -> 2 Cluster probieren?
 
 # Distanzmatrix
 
-d1 <- dist(CA1, method = 'euclidean') # check different distances with: 
+d1 <- dist(CA1, method = 'euclidean') # Methode ändern?
 ?dist
-
-head(as.matrix(d1))
+head(as.matrix(d1)) #bekomme nur 6 Zeilen, ihr auch?
 
 # Dendrogramm
 
 hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
-
-
-### ab hier eigentlich ähnlich wie im Sktipt vorgehen
 
 
 
