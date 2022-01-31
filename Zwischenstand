@@ -89,5 +89,67 @@ aggregate(d1, by=list(cluster=d1$cluster), mean)
  #Fehlermeldung: Error in aggregate.data.frame(d1, by = list(cluster = d1$cluster), mean) : 
   arguments must have same length
   
+  #corrplot
+  
+ > corrplot(d1, is.corr=FALSE)
  
+# Fehlermeldung: Error in matrix(value, nrow = nr, dimnames = list(rn, cn)) : 
+  length of 'dimnames' [2] not equal to array extent
+In addition: Warning messages:
+1: In Ops.factor(left, right) : ‘<’ not meaningful for factors
+2: In Ops.factor(left, right) : ‘<’ not meaningful for factors
+
+#Vielleicht war das mit spaa Mist, die Variable wieder zurücksetzen
+
+ > d1 <- dist(CA1, method = 'euclidean')
  
+> corrplot(d1, is.corr=FALSE)
+
+# Wieder Fehlermeldung: Error in corrplot(d1, is.corr = FALSE) : Need a matrix or data frame!
+
+#pca
+
+fviz_cluster(data = d1,
++ d1.k)
+CA.pca <- PCA(CA1,
+scale.unit = F,
+ncp = 3, graph = F)
+print(swiss.pca)
+print(CA.pca)
+> CA.pca$eig
+#die drei Cluster erklären 73% Varianz (kann man das so sagen?)
+
+#Scree plot
+> fviz_eig(CA.pca, 
+          addlabels = TRUE)
+          
+ # Output
+ 
+ > var <- CA.pca$var
+> names(var)
+> head(var$coord)
+> fviz_pca_var(CA.pca, col.var = "black")  #nicht alle Variablen leserlich
+> fviz_pca_var(
+     CA.pca,
+     axes = c(1, 2),
+     repel = TRUE,
+     col.var = "black",
+     fill.var = "white",
+     alpha.var = 1,
+     col.quanti.sup = "blue",
+     col.circle = "grey70",
+    select.var = list(name = NULL, cos2 = NULL, contrib = NULL) #besser
+    
+    > head(var$cos2)
+   #corrplot
+   > corrplot(var$cos2, is.corr=FALSE)
+   #Dimension 1 clustert besonders nach EinkommenHEB, AbschlussHEB und Haushaltseinkommen.
+   #Dimension 2 clustert besonders nach Einkommen, AbschlussHEB und StaatsangehörigkeitHEB
+   #Dimension 3 clustert fast ausschließlich nach GeschlechtsHEB
+   
+   head(var$contrib)
+   > corrplot(var$contrib, is.corr=FALSE) 
+   #interessant dass eine Dimension gibt die außschließlich mit Geschlecht clustert.
+   #mögliche Interpretation: Es gibt einen Zusammenhang zwischen Geschlcht und Berufsgruppen, bei dem in unserer Clusteranalyse untersuchten Variablen keine Störungsvariablen darstellen
+   
+  
