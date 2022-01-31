@@ -1,4 +1,380 @@
 ##Alisa Aktuell: 
+##############################################
+# Gruppenarbeit CSS, USL Gruppe 6
+##############################################
+# vorgelegt von Alisa Naumann, Ronja Plendl, Simon Hübner
+# Datensatz: Mikrozensus 2010
+# Explorative Untersuchung Berufsgruppen und Lebensumstände // hierarchische Clusteranalyse (+Hauptkomponentenanalye/PCA?)
+# Thema: Die Berufe der Haupteinkommensbezieher eines Haushalts und deren Wohn- und Lebenssituation
+#
+# Vorüberlegungen und Methodik: 
+# Mikrozensus erfasst die beruflichen und privaten Lebensumstände der deutschen Bevölkerung.
+# Der Datensatz beinhaltet 23374 Fälle und schlüsselt verschiedene Lebensbereiche der Befragten detailliert auf.
+# Abgefragt werden unter anderem mehr als 100 verschiedenen Berufe in 10 verschiedenen Berufsgruppen
+# nach der Internationalen Standardklassifikation der Berufe (ISCO-88 COM).
+# Als Forschungskontext der Untersuchung interessierte uns daher folgendes:
+# Welche Jobs bzw. Branchen ähneln sich in der Lebensführung /-umstände der Beschäftigten? 
+# Welche Gruppen bzw. soziale Entitäten lassen sich bilden?  
+
+
+library('descr')  
+library('ggplot2')
+library('stargazer')
+library('factoextra')
+library('FactoMineR')
+library("corrplot")
+library('datasets')
+library ('dotwhisker')
+library('summarytools')
+# Working Directory setzen
+setwd("E:/Gruppenarbeit Dateien/Gruppenarbeit_2022_Projekt/Data")
+getwd()
+#install.packages('haven')
+library(haven)
+Mikrozensus <- read_dta('mz2010_cf.dta')
+#Subdatensatz mit relevanten Variablen für bessere Übersichtlichkeit
+
+MZsubCA <-Mikrozensus[,c( "ef1",                                                                       #"ef136", "ef310", "ef312", "ef44", "ef46", "ef131",
+                          "ef739", "ef742", "ef745", "ef731", "ef734",
+                          "ef707", "ef492", "ef638", "ef663", "ef669", "ef770", "ef667", "ef491")]
+variable.names(MZsubCA)
+str(MZsubCA)
+#### Angaben des Befragten - aktuell rauslassen, wird aber ggf. nochmal relevant 
+#MZsubCA$Beruf                     <- MZsubCA$ef136
+#MZsubCA$Einkommen                 <- MZsubCA$ef830 
+#MZsubCA$Schulabschluss            <- MZsubCA$ef310
+#MZsubCA$hoechsterAbschluss        <- MZsubCA$ef312 
+#MZsubCA$Geschlecht                <- MZsubCA$ef44 
+#MZsubCA$Alter                     <- MZsubCA$ef46 
+MZsubCA$Land                      <- MZsubCA$ef1
+MZsubCA$BerufHEB                  <- MZsubCA$ef739
+MZsubCA$EinkommenHEB              <- MZsubCA$ef742
+MZsubCA$AbschlussHEB              <- MZsubCA$ef745
+MZsubCA$GeschlechtHEB             <- MZsubCA$ef731
+MZsubCA$StaatsangehoerigkeitHEB   <- MZsubCA$ef734
+MZsubCA$Haushaltseinkommen        <- MZsubCA$ef707 
+MZsubCA$Wohnraumgroesse            <- MZsubCA$ef492 
+MZsubCA$QuadratmeterMiete         <- MZsubCA$ef638 
+MZsubCA$Haushaltsgroesse           <- MZsubCA$ef663 
+MZsubCA$AnzahlKinderHH            <- MZsubCA$ef669
+MZsubCA$AnzahlKinderInsges        <- MZsubCA$ef770 
+MZsubCA$AnzahlEinkommensbezieher  <- MZsubCA$ef667 
+MZsubCA$Wohneigentum              <- MZsubCA$ef491   #Wohnhaft in eigenem Gebäude/eigener Wohnung/HauptmieterIn/UntermieterIn
+
+############# Deskriptiver Teil ######################
+# Für Fragestellung relevante  Variablen betrachten und ggf. umcodieren
+
+# Relevante Packages:
+# install.packages('summarytools')
+library(summarytools)
+# install.packages('car')
+library(car)             # umcodieren von Variablen
+MZsubCA$BerufHEB <- recode(MZsubCA$BerufHEB, "999=NA") #Berufe ohne Angabe = NA
+freq(MZsubCA$BerufHEB)
+table(MZsubCA$BerufHEB)
+# Wollen wir hier gleich deskriptiv ein paar Sachen raus ziehen?                        ###Ja, stimmt, ich denke auch wir sollten die Berufsgruppen besser noch einmal betrachten
+# z.B.: mit 694 Fällen ist der größte Berufsbereich: "Architekten, Ingenieure und verwandte Wissenschaftler"
+# [edit: ÄHM was ist denn das für ne umfassende Gruppe?! Die könnten wir uns ggf. mal genauer anschauen]
+
+MZsubCA$Land <- recode(MZsubCA$Land, "11=0")  #West = 1, Ost = 0
+freq(MZsubCA$Land)
+MZsubCA$EinkommenHEB <- recode(MZsubCA$EinkommenHEB, "50=NA;90=NA;99=NA") #selbstständiger Landwirt, kein Einkommen, ohne Angabe = NA
+freq(MZsubCA$EinkommenHEB)
+MZsubCA$AbschlussHEB <- recode(MZsubCA$AbschlussHEB, "11=1;21=2;31=3;32=4;33=5;41=6;51=7;52=8;60=9") #ordinale 9-stufige Skala für Abschluss
+freq(MZsubCA$AbschlussHEB)
+MZsubCA$GeschlechtHEB <- recode(MZsubCA$GeschlechtHEB, "2=0")  #Männlich=1, Weiblich=0
+freq(MZsubCA$GeschlechtHEB)
+MZsubCA$StaatsangehoerigkeitHEB <- recode(MZsubCA$StaatsangehoerigkeitHEB, "2=0")  #Deutsch=1, Andere=0
+freq(MZsubCA$StaatsangehoerigkeitHEB)   
+MZsubCA$Haushaltseinkommen <- recode(MZsubCA$Haushaltseinkommen, "50=NA;99=NA") #selbstständiger Landwirt, ohne Angabe = NA
+freq(MZsubCA$Haushaltseinkommen)
+MZsubCA$Wohnraumgroesse <- recode(MZsubCA$Wohnraumgroesse, "999=NA") #Wohnraumgröße ohne Angabe = NA
+freq(MZsubCA$Wohnraumgroesse)
+freq(MZsubCA$Haushaltsgroesse)
+freq(MZsubCA$AnzahlKinderHH)
+freq(MZsubCA$AnzahlKinderInsges)
+freq(MZsubCA$AnzahlEinkommensbezieher)
+freq(MZsubCA$QuadratmeterMiete) ### fällt raus, da viel NA und Personen die keine Miete zahlen - Stattdessen Wohneigentum?
+# [gute Ergänzung!]
+MZsubCA$Wohneigentum <- recode(MZsubCA$Wohneigentum, "1=4;2=3;3=2;4=1") #umcodiert, sodass aufsteigend von Untermieter bis Gebäudeeigentümer
+freq(MZsubCA$Wohneigentum)
+# [Alternativ: nur Eigentum vs Miete?]         ###Sehr gut, find ich auch
+MZsubCA$WohneigentumJaNein <- recode(MZsubCA$Wohneigentum, "1=1 ; 2=1 ; 3=2 ; 4=2 ; 9=NA") 
+# umcodiert, wäre dann1= Eigentum und 2= Miete
+freq(MZsubCA$WohneigentumJaNein)
+CA <-MZsubCA[,c("Land", "BerufHEB", "EinkommenHEB", "AbschlussHEB", "GeschlechtHEB", "StaatsangehoerigkeitHEB",
+                "Haushaltseinkommen", "Wohnraumgroesse", "Haushaltsgroesse",
+                "AnzahlKinderHH", "AnzahlKinderInsges", "AnzahlEinkommensbezieher", "WohneigentumJaNein")]
+CAnoNA <- na.omit(CA)
+#Betrachten der Variable Berufe - Häufigkeiten, ggf. Berufsgruppen entfernen?
+freq(CA$BerufHEB)
+freq(CAnoNA$BerufHEB)
+CAnoNA$BerufHEB          #unter 5: 811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen)
+#unter 10: 111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe)
+#nicht vorhanden: 223 (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
+#nicht vorhanden: 613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
+
+#### Tabelle mit Means der Berufsgruppen je Variable
+CAmeans <- aggregate(cbind(Land, EinkommenHEB, AbschlussHEB, GeschlechtHEB, StaatsangehoerigkeitHEB,
+                           Haushaltseinkommen, Wohnraumgroesse, Haushaltsgroesse,
+                           AnzahlKinderHH, AnzahlKinderInsges, AnzahlEinkommensbezieher, WohneigentumJaNein) ~ BerufHEB, CA, mean)
+CAmeans$BerufHEB
+freq(CAmeans$BerufHEB)
+#rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
+#                       "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
+#                       "341","342","343","344","345","346","347","348",
+#                       "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
+#                       "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
+#                       "831","832","833","834","911","913","914","915","921","931","932","933")
+#### Benennung der Berufsgruppen für bessere Übersichtlichkeit/Interpretierbarkeit
+rownames(CAmeans) <- c( "Soldaten",                                        #11
+                        "Politiker/leitende Verwaltungsbedienstete",       #111
+                        "leitende Bedienstete Interessenorg.",             #114
+                        "Geschäftsleiter/Bereichsleiter große Org.",       #120
+                        "Direktoren/Hauptgeschäftsführer",                 #121
+                        "Produktions-/Operationsleiter",                   #122
+                        "sonstige Fachbereichsleiter",                     #123
+                        "Leiter kleiner Unternehmen o.n.A.",               #130
+                        "Leiter kleiner Unternehmen",                      #131
+                        "Physiker/Chemiker etc.",                          #211
+                        "Mathematiker/Statistiker/etc.",                   #212
+                        "Informatiker",                                    #213
+                        "Architekten/Ingenieure etc.",                     #214
+                        "Biowissenschaftler",                              #221
+                        "Mediziner",                                       #222
+                        "Uni-/Hochschullehrer",                            #231
+                        "Lehrer Sekundarbereich",                          #232
+                        "wiss. Lehrer Primär-/Vorschulbereich",            #233
+                        "wiss. Sonderschullehrer",                         #234
+                        "sonst. wiss. Lehrkräfte",                         #235
+                        "Unternehmensberatungs-/Organisationsfachkr.",     #241
+                        "Juristen",                                        #242
+                        "Archiv-/Bibliotheks-/Informationswiss.",          #243
+                        "Sozialwissenschaftler etc.",                      #244
+                        "Schriftsteller, bildende/darst. Künstler",        #245
+                        "Geistliche/Seelsorger",                           #246
+                        "wiss. Verwaltungsfachkr. öffentl. Dienst",        #247
+                        "material-/ingenieurtechnische Fachkr",            #311
+                        "Datenverarbeitungsfachkräfte",                    #312
+                        "Bediener optischer/elektronischer Anlagen",       #313
+                        "Schiffs-/Flugzeugführer etc.",                    #314
+                        "Sicherheits-/Qualitätskontrolleure",              #315
+                        "Biotechniker etc.",                               #321
+                        "med. Fachberufe (ohne Krankenpflege)",            #322
+                        "Krankenpflege/Geburtshilfefachkr. n.wiss.",       #323
+                        "Lehrkräfte Vorschule n.wiss",                     #332
+                        "Sonderschullehrkräfte n.wiss.",                   #333
+                        "Sonstige Lehrkräfte n.wiss.",                     #334
+                        "Finanz-/Verkaufsfachkräfte",                      #341
+                        "Vermittler gew. Dienstleist./Handelsmakler",      #342
+                        "Verwaltungsfachkräfte",                           #343
+                        "Zoll-/Steuer-Fachkräfte etc.",                    #344
+                        "Polizeikommissare/Detektive",                     #345
+                        "Sozialpflegerische Berufe",                       #346
+                        "Künstler-/unterhaltungs-/Sportberufe",            #347
+                        "Ordensbrüder/-Schwestern/Seelsorgehelfer",        #348
+                        "Sekretärinnen/Machienenschreibkr. etc.",          #411
+                        "Rechnungs-/Statistik-/Finanzwesensangest.",       #412
+                        "Materialverwaltungs-/Tansportangestellte",        #413
+                        "Bibliotheks-/Postangestellte etc.",               #414
+                        "sonstige Büroangestellte",                        #419
+                        "Kassierer-/Schalterangestellte etc.",             #421
+                        "Kundeninformationsangestellte",                   #422
+                        "Reisebegleiter etc.",                             #511
+                        "Dienstleistungsberuf Hauswirtschaft/Gastro",      #512
+                        "Pflegeberufe etc.",                               #513
+                        "sonst. personenbez. Dienstleistungsberufe",       #514
+                        "Sicherheitsbedienstete",                          #516
+                        "Mannequins/Dressmen/Marktverkäufer etc.",         #521
+                        "Fachkr. Landwirtschaft/Fischerei",                #610
+                        "Gärtner/Ackerbauern",                             #611
+                        "Tierwirtschaftliche Berufe etc.",                 #612
+                        "Forstarbeitskräfte/Fischer/Jäger etc.",           #614
+                        "Bergleute/Sprengmeister/Steinbearbeiter etc.",    #711
+                        "Baukonstruktionsberufe etc.",                     #712
+                        "Ausbauberufe etc.",                               #713
+                        "Maler/Gebäudereiniger etc.",                      #714
+                        "Former/Baumetallverformer/Schweißer etc.",        #721       
+                        "Grobschmiede/Werkzeugmacher etc.",                #722
+                        "Maschinenmechaniker/-schlosser",                  #723
+                        "Elektro-/Elektronikmechaniker/-monteure",         #724
+                        "Präzisionsarbeiter Metall verw. Werkstoffe",      #731
+                        "Töpfer/Glasmacher/Kunsthandwerker etc.",          #732
+                        "Druckhandwerker etc.",                            #734
+                        "Nahrungsmittelverarbeitungsberufe etc.",          #741
+                        "Holzbearbeiter/Möbeltischler etc.",               #742
+                        "Textil-/Bekleidungsberufe etc.",                  #743
+                        "Fell-/Lederverarbeiter/Schuhmacher",              #744
+                        "Anlagenbed. Mineralaufber./Keramik/Glas etc.",    #811
+                        "Verfahrensanlagebed. Metallerzeugung/-formung",   #812
+                        "Anlagenbed. Holzaufbereitung/Papierherst.",       #814
+                        "Bediener chemischer Verfahrensanlagen",           #815
+                        "Bediener Energieerzeugungsanlagen etc.",          #816
+                        "Maschinenbed. Metall/Mineralerz.",                #821
+                        "Maschinenbed. chemische Erzeugnisse",             #822
+                        "Maschinenbed. Gummi/Kunststofferzeugn./Holz",     #823
+                        "Maschinenbed. Druck-/Buchbinde-/Papiererz.",      #825
+                        "Maschinenbed. Textil-/Pelz-/Ledererz.",           #826
+                        "Maschinenbed. Nahrungs-/Genussmittelherst.",      #827
+                        "Montierer",                                       #828
+                        "sonstige Maschinenbediener",                      #829
+                        "Lokomotivführer etc.",                            #831
+                        "Kraftfahrzeugführer",                             #832
+                        "Landmaschinenführer etc.",                        #833
+                        "Deckspersonal Schiffe etc.",                      #834
+                        "Straßenhändler etc./Müllsammler",                 #911
+                        "Haushaltshilfen/Reinigungspersonal etc.",         #913
+                        "Hausmeister/Fensterputzer etc.",                  #914
+                        "Boten/Träger/Pförtner etc.",                      #915
+                        "Hilfsarbeiter Landwirtsch./Fischerei",            #921
+                        "Hilfsarbeiter Bergbau/Baugewerbe",                #931
+                        "Hilfsarbeiter Fertigung",                         #932
+                        "Transport-/Frachtarbeiter")                       #933
+rownames(CAmeans)
+#### Durchführung der Clusteranalyse
+library(factoextra)
+library(FactoMineR)
+library(ggplot2)
+
+# Skalieren
+CA1 <- scale(CAmeans[,2:13])
+# Ellbogenkriterium / Silhouette
+fviz_nbclust(CA1, hcut, method = "wss") +
+  geom_vline(xintercept = 5, linetype = 2)+
+  labs(subtitle = "Elbow method")
+# Kein eindeutiger "Knick" erkennbar - am ehesten noch bei 5 Clustern?
+fviz_nbclust(CA1, hcut, method = "silhouette")+
+  labs(subtitle = "Silhouette method")
+# Maximum eindeutig bei 2 Clustern -> 2 Cluster probieren?
+# Distanzmatrix
+d1 <- dist(CA1, method = 'euclidean') # Methode ändern?
+#?dist
+head(as.matrix(d1))
+# Dendrogramm
+HC <- hclust(d1, method="complete")
+fviz_dend(HC)
+fviz_dend(HC,2)
+fviz_dend(HC,3)
+fviz_dend(HC,5)
+
+# Ableiten der Lösung für das Cluster    ###### sollten uns hier für eine Lösung anhand der Plots/Dendrogramm entschieden haben, habs erstmal für 2 versucht
+
+
+#Lösung 2 Cluster
+cluster2 <- cutree(HC, k = 2) 
+head(cluster2)
+CAmeans$cluster2 <- cluster2
+CAmeans$BerufeHEB <- row.names(CAmeans)
+
+#Lösung 3 Cluster
+#cluster3 <- cutree(HC, k = 3) 
+#head(cluster3)
+#CAmeans$cluster3 <- cluster3
+#CAmeans$BerufeHEB <- row.names(CAmeans)
+
+#3. Cluster nur sehr geringe Anzahl Fälle/Berufsgruppen
+
+#Lösung 5 Cluster
+cluster5 <- cutree(HC, k = 5) 
+head(cluster5)
+CAmeans$cluster5 <- cluster5
+CAmeans$BerufeHEB <- row.names(CAmeans)
+
+
+# Cluster visualisieren   ##### ein paar Grafiken + ästhetische Anpassungen - hier gerne herumspielen mit interessanten Kombis
+
+#  geom_label leider noch unübersichtlicher als geom_text 
+#  geom_label(aes(label= BerufeHEB), size = 2)
+
+# Lösung um Überlappen zu verhindern durch ggrepel??
+# install.packages('ggrepel')
+# library(ggrepel)
+# https://ggrepel.slowkow.com/articles/examples.html
+
+
+
+# Visualisierungen, um Unterschiede aufzuzeigen
+# 2 Cluster:
+
+# Betrachtung Einkommen/Wohnraumgröße
+ggplot(CAmeans, aes(x=EinkommenHEB, y = Wohnraumgroesse, color = factor(cluster2))) +   
+  geom_point() + #hier das "+" weg, um nur Punkte in Plot zu haben - geom_text zeigt Berufnamen leider sehr überlappend an
+  geom_text(aes(label= BerufeHEB), size = 2, hjust = 0, nudge_x = 0.05)
+
+  
+ggplot(CAmeans, aes(x=WohneigentumJaNein, y = Wohnraumgroesse, color = factor(cluster2))) +   
+  geom_point () + 
+  geom_text(aes(label= BerufeHEB), size = 2, hjust = 0, nudge_x = 0.05)
+  
+# Vergleich der Lebensumstände hier deutlich: Wohlhabenderes Cluster verfügt über mehr Wohnfläche (häufiger in Eigentum) und Einkommen
+
+
+ggplot(CAmeans, aes(x= GeschlechtHEB , y = AnzahlKinderHH, color = factor(cluster2))) +   
+  geom_point() +
+  geom_text(aes(label= BerufeHEB), size = 2, hjust = 0, nudge_x = 0.02)
+  
+# Cluster 1 hat zudem häufiger "klassisches Familienbild" mit Mann als Haupteinkommensbezieher
+# Damit gehen interessanterweise auch häufiger eine höhere Anzahl an Kindern im Haushalt einher
+
+
+# 5 Cluster:
+ggplot(CAmeans, aes(x=EinkommenHEB  , y = AnzahlKinderHH, color = factor(cluster5))) +   
+  geom_point() 
+  geom_text(aes(label= BerufeHEB), size = 2, hjust = 0, nudge_x = 0.05)+
+geom_label(aes(label= BerufeHEB), size = 3)
+
+# Machen wir 5 ausführlich?
+
+  
+  
+# Vergleich der Cluster anhand der 13 Variablen
+# Ein Mean Vergleich de jeweiligen CLuster und ihrer Ausprägungen der Variablen + Gegenüberstellung mit transpose(t) 
+  
+
+rm(cluster2)
+rm(Vergleich2)
+
+# und 2 Cluster: 
+Vergleich2 <- c('EinkommenHEB','Haushaltseinkommen', 'AbschlussHEB', 'AnzahlKinderHH','AnzahlKinderInsges', 
+                'Wohnraumgroesse', 'Haushaltsgroesse','Land', 'GeschlechtHEB', 'StaatsangehoerigkeitHEB',
+                'AnzahlEinkommensbezieher', 'WohneigentumJaNein')
+cluster.descr2 <- aggregate(CAmeans[,Vergleich2], by=list(cluster=CAmeans$cluster2), mean)
+cluster.descr2
+t(cluster.descr2)
+
+# In der Cluster-Gegenüberstellung lassen sich Unterschiede erfassen
+# Cluster 1 verfügt über ein etwas höheres `"Wohlstandniveau", wenn man die Lebensumstände betrachtet
+# Das zeigt sich in höherem verfügbaren Haushaltseinkommen und mehr Wohnfläche
+# Zugleich ist in den zugehörigen Berufsgruppen auch die Kinderanzahl höher als in Cluster 2 
+# Nicht zuletzt ist in diesem Cluster das Geschlecht des Haupteinkommensbeziehers häufiger Männlich
+
+
+
+Vergleich5 <- c('EinkommenHEB','Haushaltseinkommen', 'AbschlussHEB', 'AnzahlKinderHH','AnzahlKinderInsges', 
+                'Wohnraumgroesse', 'Haushaltsgroesse','Land', 'GeschlechtHEB', 'StaatsangehoerigkeitHEB',
+                'AnzahlEinkommensbezieher', 'WohneigentumJaNein')
+
+cluster.descr5 <- aggregate(CAmeans[,Vergleich5], by=list(cluster=CAmeans$cluster5), mean)
+cluster.descr5
+t(cluster.descr5)
+
+# Ausführungen!?
+# Hier wäre beispielsweise ein deutlicheres Cluster mit den eher Priviligierten/Wohlhabenden bzw. mit gut bezahlten Berufsgruppen dabei
+
+
+
+
+
+
+
+
+
+
+
+
+Sicherheitsspeicher letzter Upload Alisa:
+
+##Alisa Aktuell: 
 
 ##############################################
 # Gruppenarbeit CSS, USL Gruppe 6
@@ -343,189 +719,6 @@ ggplot(CAmeans, aes(x=EinkommenHEB, y = Wohnraumgroesse, color = factor(cluster2
 
 
 
-
-
-
-
-
-
-#########Sicherheitsspeicher letzter Upload Simon
-
-##############################################
-# Gruppenarbeit CSS, USL Gruppe 6
-##############################################
-# vorgelegt von Alisa Naumann, Ronja Plendl, Simon Hübner
-
-# Datensatz: Mikrozensus 2010
-# Explorative Untersuchung Berufsgruppen und Lebensumstände // hierarchische Clusteranalyse (+Hauptkomponentenanalye/PCA?)
-# Es geht um die Berufe der Haupteinkommensbezieher eines Haushalts und deren Wohn- und Lebenssituation
-
-# Vorüberlegungen und Methodik: 
-# Mikrozensus erfasst die beruflichen und privaten Lebensumstände der deutschen Bevölkerung
-# Der Datensatz beinhaltet 23374 Fälle und schlüsselt verschiedene Lebensbereiche der Befragten detailliert auf
-# Auffallend ist die Erfassung von über 100 verschiedenen Berufen bzw. Berufsgruppen (113?)
-
-# Als Forschungskontext der Untersuchung interessierte uns daher folgendes:
-# Welche Jobs bzw. Branchen ähneln sich in der Lebensführung /-umstände der Beschäftigten? 
-# Welche Gruppen bzw. soziale Entitäten lassen sich bilden?  
-
-
-library('descr')  
-library('ggplot2')
-library('stargazer')
-library('factoextra')
-library('FactoMineR')
-library("corrplot")
-library('datasets')
-library ('dotwhisker')
-library('summarytools')
-
-
-setwd("E:/Gruppenarbeit Dateien/Gruppenarbeit_2022_Projekt/Data")
-getwd()
-
-#install.packages('haven')
-library(haven)
-Mikrozensus <- read_dta('mz2010_cf.dta')
-
-
-#Subdatensatz mit relevanten Variablen [ist hier nur zur Übersicht drin oder?]
-
-MZsubCA <-Mikrozensus[,c( "ef1",                                                                       #"ef136", "ef310", "ef312", "ef44", "ef46", "ef131",
-                          "ef739", "ef742", "ef745", "ef731", "ef734",
-                          "ef707", "ef492", "ef638", "ef663", "ef669", "ef770", "ef667", "ef491")]
-variable.names(MZsubCA)
-str(MZsubCA)
-
-#### Befragter - aktuell rauslassen, wird aber ggf. nochmal relevant 
-#MZsubCA$Beruf                     <- MZsubCA$ef136
-#MZsubCA$Einkommen                 <- MZsubCA$ef830 
-#MZsubCA$Schulabschluss            <- MZsubCA$ef310
-#MZsubCA$hoechsterAbschluss        <- MZsubCA$ef312 
-#MZsubCA$Geschlecht                <- MZsubCA$ef44 
-#MZsubCA$Alter                     <- MZsubCA$ef46 
-
-
-MZsubCA$Land                      <- MZsubCA$ef1
-
-MZsubCA$BerufHEB                  <- MZsubCA$ef739
-MZsubCA$EinkommenHEB              <- MZsubCA$ef742
-MZsubCA$AbschlussHEB              <- MZsubCA$ef745
-MZsubCA$GeschlechtHEB             <- MZsubCA$ef731
-MZsubCA$StaatsangehoerigkeitHEB   <- MZsubCA$ef734
-
-MZsubCA$Haushaltseinkommen        <- MZsubCA$ef707 
-MZsubCA$Wohnraumgroeße            <- MZsubCA$ef492 
-MZsubCA$QuadratmeterMiete         <- MZsubCA$ef638 
-MZsubCA$Haushaltsgroeße           <- MZsubCA$ef663 
-MZsubCA$AnzahlKinderHH            <- MZsubCA$ef669
-MZsubCA$AnzahlKinderInsges        <- MZsubCA$ef770 
-MZsubCA$AnzahlEinkommensbezieher  <- MZsubCA$ef667 
-MZsubCA$Wohneigentum              <- MZsubCA$ef491   #Wohnhaft in eigenem Gebäude/eigener Wohnung/HauptmieterIn/UntermieterIn
-
-
-############# Deskriptiver Teil ######################
-
-# Für Fragestellung relevante  Variablen betrachten und ggf. umcodieren
-
-# Relevante Packages:
-# install.packages('summarytools')
-library(summarytools)
-# install.packages('car')
-library(car)             # umcodieren von Variablen
-
-MZsubCA$BerufHEB <- recode(MZsubCA$BerufHEB, "999=NA") #Berufe ohne Angabe = NA
-freq(MZsubCA$BerufHEB)
-table(MZsubCA$BerufHEB)
-
-# Wollen wir hier gleich deskriptiv ein paar Sachen raus ziehen?
-# z.B.: mit 694 Fällen ist der größte Berufsbereich: "Architekten, Ingenieure und verwandte Wissenschaftler"
-# [edit: ÄHM was ist denn das für ne umfassende Gruppe?! Die könnten wir uns ggf. mal genauer anschauen]
-
-MZsubCA$Land <- recode(MZsubCA$Land, "11=0")  #West = 1, Ost = 0
-freq(MZsubCA$Land)
-
-MZsubCA$EinkommenHEB <- recode(MZsubCA$EinkommenHEB, "50=NA;90=NA;99=NA") #selbstständiger Landwirt, kein Einkommen, ohne Angabe = NA
-freq(MZsubCA$EinkommenHEB)
-
-MZsubCA$AbschlussHEB <- recode(MZsubCA$AbschlussHEB, "11=1;21=2;31=3;32=4;33=5;41=6;51=7;52=8;60=9") #ordinale 9-stufige Skala für Abschluss
-freq(MZsubCA$AbschlussHEB)
-
-MZsubCA$GeschlechtHEB <- recode(MZsubCA$GeschlechtHEB, "2=0")  #Männlich=1, Weiblich=0
-freq(MZsubCA$GeschlechtHEB)
-
-MZsubCA$StaatsangehoerigkeitHEB <- recode(MZsubCA$StaatsangehoerigkeitHEB, "2=0")  #Deutsch=1, Andere=0
-freq(MZsubCA$StaatsangehoerigkeitHEB)   
-
-MZsubCA$Haushaltseinkommen <- recode(MZsubCA$Haushaltseinkommen, "50=NA;99=NA") #selbstständiger Landwirt, ohne Angabe = NA
-freq(MZsubCA$Haushaltseinkommen)
-
-MZsubCA$Wohnraumgroeße <- recode(MZsubCA$Wohnraumgroeße, "999=NA") #Wohnraumgröße ohne Angabe = NA
-freq(MZsubCA$Wohnraumgroeße)
-
-freq(MZsubCA$Haushaltsgroeße)
-freq(MZsubCA$AnzahlKinderHH)
-freq(MZsubCA$AnzahlKinderInsges)
-freq(MZsubCA$AnzahlEinkommensbezieher)
-
-freq(MZsubCA$QuadratmeterMiete) ### fällt raus, da viel NA und Personen die keine Miete zahlen - Stattdessen Wohneigentum?
-# [gute Ergänzung!]
-
-MZsubCA$Wohneigentum <- recode(MZsubCA$Wohneigentum, "1=4;2=3;3=2;4=1") #umcodiert, sodass aufsteigend von Untermieter bis Gebäudeeigentümer
-freq(MZsubCA$Wohneigentum)
-
-# [Alternativ: nur Eigentum vs Miete?]
-MZsubCA$WohneigentumJaNein <- recode(MZsubCA$Wohneigentum, "1=1 ; 2=1 ; 3=2 ; 4=2 ; 9=NA") 
-# umcodiert, wäre dann1= Eigentum und 2= Miete
-freq(MZsubCA$WohneigentumJaNein)
-
-
-
-CA <-MZsubCA[,c("Land", "BerufHEB", "EinkommenHEB", "AbschlussHEB", "GeschlechtHEB", "StaatsangehoerigkeitHEB",
-                "Haushaltseinkommen", "Wohnraumgroeße", "Haushaltsgroeße",
-                "AnzahlKinderHH", "AnzahlKinderInsges", "AnzahlEinkommensbezieher", "Wohneigentum")]
-
-#[Test Vergleich weniger Variablen]
-#Test1 <-MZsubCA[,c("BerufHEB", "Haushaltseinkommen", "Wohnraumgroeße", "Haushaltsgroeße",
-#                "AnzahlKinderHH",  "Wohneigentum")]
-#Test2 <-MZsubCA[,c("Haushaltseinkommen", "Wohnraumgroeße", "Haushaltsgroeße",
-#                                 "AnzahlKinderHH",  "Wohneigentum")]
-#
-# [Die letzte Überlegung für mich heute war: Wenn wir analog zu diesem Swiss Datensatz arbeiten wollen,
-# müssen wir dann nicht den ganzen Datensatz nach den BerufHEB "gruppieren"? (sind etwas über 100)]
-
-
-
-summary(CA)
-
-## Tabelle für CA müsste vorbereitet werden
-
-
-# Skalieren
-
-CA1 <- scale(CA)
-
-
-# Ellbogenkriterium / Silhouette
-
-fviz_nbclust(CA1, hcut, method = "wss") +
-  geom_vline(xintercept = 3, linetype = 2)+
-  labs(subtitle = "Elbow method")
-
-fviz_nbclust(CA1, hcut, method = "silhouette")+
-  labs(subtitle = "Silhouette method")
-
-# Distanzmatrix
-
-d1 <- dist(CA1, method = 'euclidean') # check different distances with: 
-?dist
-
-head(as.matrix(d1))
-
-# Dendrogramm
-
-hc.compl <- hclust(d1, method="complete")
-fviz_dend(hc.compl)
 
 
 
