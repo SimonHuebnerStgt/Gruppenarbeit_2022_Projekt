@@ -307,7 +307,7 @@ fviz_dend(HC,5)
 
 # Ableiten der Lösung für das Cluster    ###### sollten uns hier für eine Lösung anhand der Plots/Dendrogramm entschieden haben, habs erstmal für 2 versucht
 
-#Lösung 5 Cluster
+#Lösung 2 Cluster
 cluster2 <- cutree(HC, k = 2) 
 head(cluster)
 
