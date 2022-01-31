@@ -28,12 +28,47 @@ graph = F)
 # Gap statistic (maximum)
 fviz_nbclust(CA1, kmeans, nstart = 4,  method = "gap_stat", nboot = 500)
 
-#
+# Dendogramm mit vier Cluster
 > fviz_dend(hc.compl,4)
-> d1.k <- kmeans(d1, 
-+ 4, 
-+ iter.max = 10, 
-+ nstart = 2)
+
+# Clustersulution
 cluster <- cutree(hc.compl, k = 4)
 head(cluster)
+
+# k-means
+> d1.k <- kmeans(d1, 
+ 4, 
+ iter.max = 10, 
+ nstart = 2)
 print(d1.k)
+> d1.k$cluster
+
+#Clusterplot
+
+fviz_cluster(data = d1,
++ d1.k)
+
+# Cluster 1 und 3 sind sehr deckend also doch besser 3 cluster
+
+#Dedogramm mit drei Clustern
+
+>  fviz_dend(hc.compl,3)
+
+#Clustersulution mit 3 Clustern
+> cluster <- cutree(hc.compl, k = 3)
+> head(cluster)
+
+# k-means mit 3 Clustern
+
+> d1.k <- kmeans(d1, 
+3, 
+iter.max = 10, 
+nstart = 2)
+print(d1.k)
+> d1.k$cluster
+
+#Clusterplot mit drei Dimensionen
+
+fviz_cluster(data = d1,
++ d1.k)
+#viel besser!
