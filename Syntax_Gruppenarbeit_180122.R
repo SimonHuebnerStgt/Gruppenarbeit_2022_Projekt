@@ -40,7 +40,7 @@ Mikrozensus <- read_dta('mz2010_cf.dta')
 
 
 #Subdatensatz mit relevanten Variablen für bessere Übersichtlichkeit
-                                                                                                       #Angaben des Befragten - aktuell rauslassen
+#Angaben des Befragten - aktuell rauslassen
 MZsubCA <-Mikrozensus[,c( "ef1",                                                                       #"ef136", "ef310", "ef312", "ef44", "ef46", "ef131",
                           "ef739", "ef742", "ef745", "ef731", "ef734",
                           "ef707", "ef492", "ef638", "ef663", "ef669", "ef770", "ef667", "ef491")]
@@ -140,9 +140,9 @@ CAnoNA <- na.omit(CA)
 freq(CA$BerufHEB)
 freq(CAnoNA$BerufHEB)
 CAnoNA$BerufHEB          #unter 5: 811 (mineralaufbereitung/keramikherstellung),825 (Maschienenbediener für Papiererzeugnisse),834 (Deckpersonal auf Schiffen)
-                         #unter 10: 111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe)
-                         #nicht vorhanden: 223 (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
-                         #nicht vorhanden: 613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
+#unter 10: 111 (Angehörige gesetzgebender Körperschaften), 348 (Ordensbrüder und Seelsorger), 612 (tierwirtschaftliche Berufe)
+#nicht vorhanden: 223 (wiss. Krankenpflege & Geburtshilfe), 331 (nicht-wiss. Lehrkräfte Primärbereich),
+#nicht vorhanden: 613 (Ackerbauern/Tierzüchter), 817 (Bediener Industrieroboter), 912 (Schuhputzer, etc.)
 
 
 #### Tabelle mit Means der Berufsgruppen je Variable
@@ -155,11 +155,11 @@ freq(CAmeans$BerufHEB)
 
 
 #rownames(CAmeans) <- c( "11","111","114","120","121","122", "123", "130","131","211","212","213","214","221","222","231","232","233","234","235",
- #                       "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
- #                       "341","342","343","344","345","346","347","348",
- #                       "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
- #                       "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
- #                       "831","832","833","834","911","913","914","915","921","931","932","933")
+#                       "241","242","243","244","245","246","247","311","312","313","314","315","321","322","323","332","333","334",
+#                       "341","342","343","344","345","346","347","348",
+#                       "411","412","413","414","419","421","422","511","512","513","514","516","521","610","611","612","614","711","712","713","714",
+#                       "721","722","723","724","731","732","734","741","742","743","744","811","812","814","815","816","821","822","823","825","826","827","828","829",
+#                       "831","832","833","834","911","913","914","915","921","931","932","933")
 
 #### Benennung der Berufsgruppen für bessere Übersichtlichkeit/Interpretierbarkeit
 rownames(CAmeans) <- c( "Soldaten",                                        #11
@@ -265,7 +265,7 @@ rownames(CAmeans) <- c( "Soldaten",                                        #11
                         "Hilfsarbeiter Bergbau/Baugewerbe",                #931
                         "Hilfsarbeiter Fertigung",                         #932
                         "Transport-/Frachtarbeiter")                       #933
-                  
+
 rownames(CAmeans)
 
 
@@ -294,16 +294,58 @@ fviz_nbclust(CA1, hcut, method = "silhouette")+
 # Distanzmatrix
 
 d1 <- dist(CA1, method = 'euclidean') # Methode ändern?
-?dist
-head(as.matrix(d1)) #bekomme nur 6 Zeilen, ihr auch?
+#?dist
+head(as.matrix(d1))
 
 # Dendrogramm
 
-hc.compl <- hclust(d1, method="complete")
-fviz_dend(hc.compl)
-fviz_dend(hc.compl,2)
-fviz_dend(hc.compl,3)
-fviz_dend(hc.compl,5)
+HC <- hclust(d1, method="complete")
+fviz_dend(HC)
+fviz_dend(HC,2)
+fviz_dend(HC,3)
+fviz_dend(HC,5)
+
+# Ableiten der Lösung für das Cluster    ###### sollten uns hier für eine Lösung anhand der Plots/Dendrogramm entschieden haben, habs erstmal für 2 versucht
+
+#Lösung 5 Cluster
+cluster2 <- cutree(HC, k = 2) 
+head(cluster)
+
+CAmeans$cluster2 <- cluster2
+CAmeans$BerufeHEB <- row.names(CAmeans)
+
+#Lösung 3 Custer
+cluster3 <- cutree(HC, k = 3) 
+head(cluster)
+
+CAmeans$cluster3 <- cluster3
+CAmeans$BerufeHEB <- row.names(CAmeans)
+
+#Lösung 5 Cluster
+cluster5 <- cutree(HC, k = 5) 
+head(cluster)
+
+CAmeans$cluster5 <- cluster5
+CAmeans$BerufeHEB <- row.names(CAmeans)
+
+
+# Cluster visualisieren   ##### ein paar Grafiken + äesthetische Anpassungen - hier gerne herumspielen mit interessanten Kombis
+
+ggplot(CAmeans, aes(x=EinkommenHEB, y = Wohnraumgroesse, color = factor(cluster2))) +   
+  geom_point() +
+  geom_text(aes(label= BerufeHEB), size = 3, hjust = 0, nudge_x = 0.05)
+  geom_label(aes(label= BerufeHEB), size = 2)
+
+  
+
+
+
+
+
+
+
+
+
 
 
 
