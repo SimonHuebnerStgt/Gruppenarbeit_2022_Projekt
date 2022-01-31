@@ -72,3 +72,8 @@ print(d1.k)
 fviz_cluster(data = d1,
 + d1.k)
 #viel besser!
+
+aggregate(d1, by=list(cluster=d1$cluster), mean)
+# Fehlermeldung: Error in as.data.frame.default(x) : 
+  cannot coerce class ‘"dist"’ to a data.frame
+  Ich glaube wir müssen d1 in ein data-frame umwandeln. Mir bisher leider nicht gelungen
