@@ -301,9 +301,9 @@ head(as.matrix(d1)) #bekomme nur 6 Zeilen, ihr auch?
 
 hc.compl <- hclust(d1, method="complete")
 fviz_dend(hc.compl)
-
-
-
+fviz_dend(hc.compl,2)
+fviz_dend(hc.compl,3)
+fviz_dend(hc.compl,5)
 
 
 
