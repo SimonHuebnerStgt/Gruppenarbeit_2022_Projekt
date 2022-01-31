@@ -152,4 +152,28 @@ print(CA.pca)
    #interessant dass eine Dimension gibt die außschließlich mit Geschlecht clustert.
    #mögliche Interpretation: Es gibt einen Zusammenhang zwischen Geschlcht und Berufsgruppen, bei dem in unserer Clusteranalyse untersuchten Variablen keine Störungsvariablen darstellen
    
+#contribution of variables als Barplot
+> fviz_contrib(CA.pca, choice = "var", axes = 1, top = 10)
+> fviz_contrib(CA.pca, choice = "var", axes = 2, top = 10)
+> fviz_contrib(CA.pca, choice = "var", axes = 3, top = 10)
+
+#geordnete Darstellung
+> pc.1 <- var$cor[order(-var$cor[, 'Dim.1']), 'Dim.1']
+> head(pc.1)
+ pc.2 <- var$cor[order(-var$cor[, 'Dim.2']), 'Dim.2']
+ head(pc.2)
+ pc.3 <- var$cor[order(-var$cor[, 'Dim.3']), 'Dim.3']
+> head(pc.3)
+
+#individuelle PCA
+> fviz_pca_ind(CA.pca, col.ind = "cos2", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+              repel = TRUE )
+> fviz_pca_ind(CA.pca)
+
+#ggplot
+> ggplot(d1, aes(x=BerufHEB, y = Wohnraumgroesse, color = factor(cluster)))
+#Fehlermeldung: Error: `data` must be a data frame, or other object coercible by `fortify()`, not an S3 object with class dist.
+
+>
   
